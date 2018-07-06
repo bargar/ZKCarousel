@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZKCarousel'
-  s.version          = '0.1.5'
+  s.version          = '0.1.6'
   s.summary          = 'ZKCarousel is a simple carousel based on UICollectionView.'
 
 # This description is used to generate tags and improve search results.
@@ -21,12 +21,11 @@ Pod::Spec.new do |s|
 ZKCarousel is a simple carousel control built on top of a UICollectionView. It can be used for a number of implementations, most commonly used for some sort of authentication or landing screen.
                        DESC
 
-  s.homepage         = 'https://github.com/ZacharyKhan/ZKCarousel'
+  s.homepage         = 'https://github.com/bargar/ZKCarousel'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'ZacharyKhan' => 'zachary.khan3@gmail.com' }
-  s.source           = { :git => 'https://github.com/ZacharyKhan/ZKCarousel.git', :tag => s.version.to_s }
-  s.social_media_url = 'https://twitter.com/ZacharyKhan3'
+  s.author           = { 'Jeremiah Bargar' => 'jeremy@formigaconsulting.com' }
+  s.source           = { :git => 'https://github.com/bargar/ZKCarousel.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '8.0'
 
