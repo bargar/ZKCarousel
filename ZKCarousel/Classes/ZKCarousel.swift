@@ -109,10 +109,9 @@ fileprivate class carouselCollectionViewCell: UICollectionViewCell {
     
     private lazy var imageView : UIImageView = {
         let iv = UIImageView()
-        iv.contentMode = .scaleAspectFill
+        iv.contentMode = .scaleAspectFit
         iv.backgroundColor = .clear
         iv.clipsToBounds = true
-        iv.addBlackGradientLayer(frame: self.bounds)
         return iv
     }()
     
