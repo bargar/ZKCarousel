@@ -26,7 +26,7 @@ final public class ZKCarousel: UIView, UICollectionViewDelegateFlowLayout, UICol
         return control
     }()
     
-    public lazy var collectionView : UICollectionView = {
+    fileprivate lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -49,6 +49,12 @@ final public class ZKCarousel: UIView, UICollectionViewDelegateFlowLayout, UICol
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupCarousel()
+    }
+        
+    public func scrollToSlide(index: Int) {
+        self.pageControl.currentPage = index
+        let indexPathToShow = IndexPath(item: index, section: 0)
+        self.collectionView.selectItem(at: indexPathToShow, animated: true, scrollPosition: .centeredHorizontally)
     }
     
     private func setupCarousel() {
