@@ -10,17 +10,11 @@ import UIKit
 
 final public class ZKCarousel: UIView, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UICollectionViewDataSource {
     
-    
     public var slides : [ZKCarouselSlide] = [] {
         didSet {
             self.collectionView.reloadData()
         }
     }
-    
-    private lazy var tapGesture : UITapGestureRecognizer = {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(tapGestureHandler(tap:)))
-        return tap
-    }()
     
     public lazy var pageControl : UIPageControl = {
         let control = UIPageControl()
@@ -29,11 +23,10 @@ final public class ZKCarousel: UIView, UICollectionViewDelegateFlowLayout, UICol
         control.hidesForSinglePage = true
         control.pageIndicatorTintColor = .lightGray
         control.currentPageIndicatorTintColor = UIColor(red:0.20, green:0.60, blue:0.86, alpha:1.0)
-        control.translatesAutoresizingMaskIntoConstraints = false
         return control
     }()
     
-    public lazy var collectionView : UICollectionView = {
+    fileprivate lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -45,7 +38,6 @@ final public class ZKCarousel: UIView, UICollectionViewDelegateFlowLayout, UICol
         cv.backgroundColor = .clear
         cv.showsHorizontalScrollIndicator = false
         cv.bounces = false
-        cv.translatesAutoresizingMaskIntoConstraints = false
         return cv
     }()
     
@@ -58,61 +50,24 @@ final public class ZKCarousel: UIView, UICollectionViewDelegateFlowLayout, UICol
         super.init(coder: aDecoder)
         setupCarousel()
     }
+        
+    public func scrollToSlide(index: Int) {
+        self.pageControl.currentPage = index
+        let indexPathToShow = IndexPath(item: index, section: 0)
+        self.collectionView.selectItem(at: indexPathToShow, animated: true, scrollPosition: .centeredHorizontally)
+    }
     
     private func setupCarousel() {
         self.backgroundColor = .clear
-        
+
         self.addSubview(collectionView)
-        NSLayoutConstraint(item: collectionView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1.0, constant: 0).isActive = true
-        NSLayoutConstraint(item: collectionView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 0).isActive = true
-        NSLayoutConstraint(item: collectionView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1.0, constant: 0).isActive = true
-        NSLayoutConstraint(item: collectionView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: 0).isActive = true
-        
-        self.collectionView.addGestureRecognizer(self.tapGesture)
+        self.addConstraintsWithFormat("H:|[v0]|", views: collectionView)
+        self.addConstraintsWithFormat("V:|[v0]|", views: collectionView)
         
         self.addSubview(pageControl)
-        NSLayoutConstraint(item: pageControl, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1.0, constant: 20).isActive = true
-        NSLayoutConstraint(item: pageControl, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: -20).isActive = true
-        NSLayoutConstraint(item: pageControl, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: -5).isActive = true
-        NSLayoutConstraint(item: pageControl, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 25).isActive = true
+        self.addConstraintsWithFormat("H:|-20-[v0]-20-|", views: pageControl)
+        self.addConstraintsWithFormat("V:[v0(25)]-5-|", views: pageControl)
         self.bringSubview(toFront: pageControl)
-    }
-    
-    @objc private func tapGestureHandler(tap: UITapGestureRecognizer?) {
-        var visibleRect = CGRect()
-        visibleRect.origin = collectionView.contentOffset
-        visibleRect.size = collectionView.bounds.size
-        let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
-        let visibleIndexPath: IndexPath = collectionView.indexPathForItem(at: visiblePoint) ?? IndexPath(item: 0, section: 0)
-        let index = visibleIndexPath.item
-
-        if index == (slides.count-1) {
-            let indexPathToShow = IndexPath(item: 0, section: 0)
-            self.collectionView.selectItem(at: indexPathToShow, animated: true, scrollPosition: .centeredHorizontally)
-        } else {
-            let indexPathToShow = IndexPath(item: (index + 1), section: 0)
-            self.collectionView.selectItem(at: indexPathToShow, animated: true, scrollPosition: .centeredHorizontally)
-        }
-    }
-    
-    private var timer : Timer = Timer()
-    public var interval : Double?
-    
-    public func start() {
-        timer = Timer.scheduledTimer(timeInterval: interval ?? 1.0, target: self, selector: #selector(tapGestureHandler(tap:)), userInfo: nil, repeats: true)
-        timer.fire()
-    }
-    
-    public func stop() {
-        timer.invalidate()
-    }
-    
-    public func selectedIndexPath() -> IndexPath? {
-        var visibleRect = CGRect()
-        visibleRect.origin = collectionView.contentOffset
-        visibleRect.size = collectionView.bounds.size
-        let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
-        return collectionView.indexPathForItem(at: visiblePoint)
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -122,7 +77,6 @@ final public class ZKCarousel: UIView, UICollectionViewDelegateFlowLayout, UICol
     }
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print(slides.count)
         return self.slides.count
     }
     
@@ -160,11 +114,9 @@ fileprivate class carouselCollectionViewCell: UICollectionViewCell {
     
     private lazy var imageView : UIImageView = {
         let iv = UIImageView()
-        iv.contentMode = .scaleAspectFill
+        iv.contentMode = .scaleAspectFit
         iv.backgroundColor = .clear
         iv.clipsToBounds = true
-        iv.addBlackGradientLayer(frame: self.bounds)
-        iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
     
@@ -174,7 +126,6 @@ fileprivate class carouselCollectionViewCell: UICollectionViewCell {
         label.font = UIFont.boldSystemFont(ofSize: 40)
         label.textColor = .white
         label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -203,10 +154,8 @@ fileprivate class carouselCollectionViewCell: UICollectionViewCell {
         self.clipsToBounds = true
         
         self.addSubview(self.imageView)
-        NSLayoutConstraint(item: self.imageView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1.0, constant: 0).isActive = true
-        NSLayoutConstraint(item: self.imageView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 0).isActive = true
-        NSLayoutConstraint(item: self.imageView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1.0, constant: 0).isActive = true
-        NSLayoutConstraint(item: self.imageView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: 0).isActive = true
+        self.addConstraintsWithFormat("H:|[v0]|", views: self.imageView)
+        self.addConstraintsWithFormat("V:|[v0]|", views: self.imageView)
         
         self.addSubview(self.descriptionLabel)
         let left = NSLayoutConstraint(item: descriptionLabel, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1.0, constant: 15)
@@ -216,11 +165,6 @@ fileprivate class carouselCollectionViewCell: UICollectionViewCell {
         NSLayoutConstraint.activate([left, right, bottom, top])
         
         self.addSubview(self.titleLabel)
-        NSLayoutConstraint(item: self.titleLabel, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1.0, constant: 15).isActive = true
-        NSLayoutConstraint(item: self.titleLabel, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: -15).isActive = true
-        NSLayoutConstraint(item: self.titleLabel, attribute: .bottom, relatedBy: .equal, toItem: self.descriptionLabel, attribute: .top, multiplier: 1.0, constant: 8).isActive = true
-        NSLayoutConstraint(item: self.titleLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 43).isActive = true
-        
         self.addConstraintsWithFormat("H:|-15-[v0]-15-|", views: self.titleLabel)
         self.addConstraintsWithFormat("V:[v0(43)]-[v1]", views: self.titleLabel, self.descriptionLabel)
     }
@@ -240,7 +184,6 @@ fileprivate class carouselCollectionViewCell: UICollectionViewCell {
         
         return
     }
-
 }
 
 final public class ZKCarouselSlide : NSObject {
